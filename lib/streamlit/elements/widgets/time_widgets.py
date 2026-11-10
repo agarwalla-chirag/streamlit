@@ -700,8 +700,13 @@ class DateInputSerde:
                 # Matches SliderSerde.deserialize which validates bounds in the
                 # deserializer so _seed_widget_from_url can detect default equality
                 # and clear the URL param via _clear_url_param.
-                if return_value and any(
-                    d < self.value.min or d > self.value.max for d in return_value
+                if return_value and (
+                    any(d < self.value.min or d > self.value.max for d in return_value)
+                    or (
+                        self.value.is_range
+                        and len(return_value) == 2
+                        and return_value[0] > return_value[1]
+                    )
                 ):
                     return_value = self.value.value
         else:

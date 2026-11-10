@@ -1014,6 +1014,36 @@ class TestDateInputSerdeISO:
         result = serde.deserialize(["2025-03-01", "2025-03-15"])
         assert result == (date(2025, 3, 1), date(2025, 3, 15))
 
+    def test_deserialize_descending_range_reverts_to_default(self):
+        """Test that an in-bounds range with a later start reverts to default."""
+        values = _DateInputValues(
+            value=(date(2025, 3, 1), date(2025, 3, 15)),
+            is_range=True,
+            min=date(2020, 1, 1),
+            max=date(2030, 12, 31),
+        )
+        serde = DateInputSerde(values)
+
+        assert serde.deserialize(["2025-03-15", "2025-03-01"]) == (
+            date(2025, 3, 1),
+            date(2025, 3, 15),
+        )
+
+    def test_deserialize_equal_range_dates_are_accepted(self):
+        """Test that a range with equal start and end dates remains valid."""
+        values = _DateInputValues(
+            value=(date(2025, 3, 1), date(2025, 3, 15)),
+            is_range=True,
+            min=date(2020, 1, 1),
+            max=date(2030, 12, 31),
+        )
+        serde = DateInputSerde(values)
+
+        assert serde.deserialize(["2025-03-01", "2025-03-01"]) == (
+            date(2025, 3, 1),
+            date(2025, 3, 1),
+        )
+
     def test_deserialize_invalid_format_reverts_to_default(self):
         """Test that invalid date strings silently revert to the default value."""
         values = _DateInputValues(
